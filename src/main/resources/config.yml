@@ -1,0 +1,5 @@
+server_name: "spawn"
+bound_N: -75
+bound_W: -75
+bound_E: 75
+bound_S: 75

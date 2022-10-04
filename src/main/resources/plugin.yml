@@ -1,0 +1,4 @@
+name: Sectors
+version: '${project.version}'
+main: me.taison.sectors.Sectors
+api-version: 1.16
