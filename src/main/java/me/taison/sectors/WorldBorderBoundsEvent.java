@@ -1,7 +1,5 @@
 package me.taison.sectors;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -10,15 +8,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.plugin.messaging.PluginMessageListener;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Optional;
 
-public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
+public class WorldBorderBoundsEvent implements Listener {
 
     private static final double boundW = Sectors.getPlugin(Sectors.class).getConfig().getInt("bound_W");
     private static final double boundE = Sectors.getPlugin(Sectors.class).getConfig().getInt("bound_E");
@@ -38,7 +34,7 @@ public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
             return;
 
         Server serverToConnectName = Server.SPAWN;
-        SerializableLocation serializableLocation = new SerializableLocation(player.getLocation(), player.getUniqueId(), Bukkit.getServer().getPort());
+        PlayerDataToTransfer playerDataToTransfer = new PlayerDataToTransfer(player, Bukkit.getServer().getPort());
         Bound bound = getBound(player.getLocation()).get();
 
         switch (serverName) {
@@ -46,19 +42,19 @@ public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
                 switch (bound) {
                     case W -> {
                         serverToConnectName = Server.SECTOR_WEST;
-                        serializableLocation.setX(serializableLocation.getX() - 2);
+                        playerDataToTransfer.setX(playerDataToTransfer.getX() - 2);
                     }
                     case E -> {
                         serverToConnectName = Server.SECTOR_EAST;
-                        serializableLocation.setX(serializableLocation.getX() + 2);
+                        playerDataToTransfer.setX(playerDataToTransfer.getX() + 2);
                     }
                     case S -> {
                         serverToConnectName = Server.SECTOR_SOUTH;
-                        serializableLocation.setZ(serializableLocation.getZ() + 2);
+                        playerDataToTransfer.setZ(playerDataToTransfer.getZ() + 2);
                     }
                     case N -> {
                         serverToConnectName = Server.SECTOR_NORTH;
-                        serializableLocation.setZ(serializableLocation.getZ() - 2);
+                        playerDataToTransfer.setZ(playerDataToTransfer.getZ() - 2);
                     }
                 }
             }
@@ -74,11 +70,11 @@ public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
                         }
                         else
                             serverToConnectName = Server.SECTOR_NORTH;
-                        serializableLocation.setX(serializableLocation.getX() + 2);
+                        playerDataToTransfer.setX(playerDataToTransfer.getX() + 2);
                     }
                     case S -> {
                         serverToConnectName = Server.SECTOR_SOUTH;
-                        serializableLocation.setZ(serializableLocation.getZ() + 2);
+                        playerDataToTransfer.setZ(playerDataToTransfer.getZ() + 2);
                     }
                 }
             }
@@ -90,14 +86,14 @@ public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
                     }
                     case E -> {
                         serverToConnectName = Server.SECTOR_EAST;
-                        serializableLocation.setX(serializableLocation.getX() + 2);
+                        playerDataToTransfer.setX(playerDataToTransfer.getX() + 2);
                     }
                     case N -> {
                         if (playerX >= -75)
                             serverToConnectName = Server.SPAWN;
                         else
                             serverToConnectName = Server.SECTOR_WEST;
-                        serializableLocation.setZ(serializableLocation.getZ() - 2);
+                        playerDataToTransfer.setZ(playerDataToTransfer.getZ() - 2);
                     }
                 }
             }
@@ -105,7 +101,7 @@ public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
                 switch (bound) {
                     case W -> {
                         serverToConnectName = Server.SECTOR_WEST;
-                        serializableLocation.setX(serializableLocation.getX() - 2);
+                        playerDataToTransfer.setX(playerDataToTransfer.getX() - 2);
                     }
                     case E, N -> {
                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("Dotarłeś do granicy mapy!"));
@@ -116,7 +112,7 @@ public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
                             serverToConnectName = Server.SPAWN;
                         else
                             serverToConnectName = Server.SECTOR_EAST;
-                        serializableLocation.setZ(serializableLocation.getZ() + 2);
+                        playerDataToTransfer.setZ(playerDataToTransfer.getZ() + 2);
                     }
                 }
             }
@@ -127,7 +123,7 @@ public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
                             serverToConnectName = Server.SPAWN;
                         else
                             serverToConnectName = Server.SECTOR_SOUTH;
-                        serializableLocation.setX(serializableLocation.getX() - 2);
+                        playerDataToTransfer.setX(playerDataToTransfer.getX() - 2);
                     }
                     case E, S -> {
                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("Dotarłeś do granicy mapy!"));
@@ -135,7 +131,7 @@ public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
                     }
                     case N -> {
                         serverToConnectName = Server.SECTOR_NORTH;
-                        serializableLocation.setZ(serializableLocation.getZ() - 2);
+                        playerDataToTransfer.setZ(playerDataToTransfer.getZ() - 2);
                     }
                 }
             }
@@ -150,9 +146,8 @@ public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         player.sendPluginMessage(Sectors.getPlugin(Sectors.class), "changesector:main", b.toByteArray());
-        RedisPubSubSystem.publish(serializableLocation);
+        RedisPubSubSystem.publish(playerDataToTransfer, (byte) 9);
     }
 
     private Optional<Bound> getBound(Location location) {
@@ -174,14 +169,4 @@ public class WorldBorderBoundsEvent implements Listener, PluginMessageListener {
         return Optional.empty();
     }
 
-    @Override
-    public void onPluginMessageReceived(@NotNull String channel, @NotNull Player player, @NotNull byte[] message) {
-        ByteArrayDataInput byteArrayInput = ByteStreams.newDataInput(message);
-        String s1 = byteArrayInput.readUTF();
-        String s2 = byteArrayInput.readUTF();
-        player.sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(byteArrayInput.readUTF()));
-        System.out.println(s1);
-        System.out.println(s2);
-        System.out.println(byteArrayInput.readUTF());
-    }
 }

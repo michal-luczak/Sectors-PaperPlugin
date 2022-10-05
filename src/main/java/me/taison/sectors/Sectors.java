@@ -10,7 +10,6 @@ public final class Sectors extends JavaPlugin {
     public void onEnable() {
         getServer().getPluginManager().registerEvents(new WorldBorderBoundsEvent(), this);
         getServer().getMessenger().registerOutgoingPluginChannel(this, "changesector:main");
-        getServer().getMessenger().registerIncomingPluginChannel(this, "changesector:main", new WorldBorderBoundsEvent());
         saveDefaultConfig();
 
         thread.start();
