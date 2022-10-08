@@ -1,5 +1,7 @@
 package me.taison.sectors;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,6 +13,8 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 public class PlayerDataToTransfer implements Serializable {
 
     private int x,y,z;
@@ -20,78 +24,13 @@ public class PlayerDataToTransfer implements Serializable {
     private final HashMap<Integer, ImmutablePair<Material, Integer>> enderchest = new HashMap<>();
     private final HashMap<EquipmentSlot, Material> armor = new HashMap<>();
     private HashSet<Map<String, Object>> effects;
-
-    public HashSet<Map<String, Object>> getEffects() {
-        return effects;
-    }
-
-    public void setEffects(HashSet<Map<String, Object>> effects) {
-        this.effects = effects;
-    }
-
-    public HashMap<Integer, ImmutablePair<Material, Integer>> getItems() {
-        return items;
-    }
-
-    public HashMap<EquipmentSlot, Material> getArmor() {
-        return armor;
-    }
-
-    public float getYaw() {
-        return yaw;
-    }
-
-    public void setYaw(float yaw) {
-        this.yaw = yaw;
-    }
-
     private float yaw;
-
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public int getZ() {
-        return z;
-    }
-
-    public void setZ(int z) {
-        this.z = z;
-    }
-
-    public int getServerPort() {
-        return serverPort;
-    }
-
-    public void setServerPort(int serverPort) {
-        this.serverPort = serverPort;
-    }
-
-    public HashMap<Integer, ImmutablePair<Material, Integer>> getEnderchest() {
-        return enderchest;
-    }
+    private float health;
+    private int hunger;
 
     public PlayerDataToTransfer(Player player, int serverPort) {
+        hunger = player.getFoodLevel();
+        health = (float) player.getHealth();
         x = player.getLocation().getBlockX();
         y = player.getLocation().getBlockY();
         z = player.getLocation().getBlockZ();

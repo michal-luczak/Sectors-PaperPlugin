@@ -68,6 +68,9 @@ public class RedisPubSubSystem {
                                             player.getEnderChest().setItem(i, new ItemStack(playerDataToTransfer.getEnderchest().get(i).left,
                                                     playerDataToTransfer.getEnderchest().get(i).right));
                                         }
+
+                                        player.setFoodLevel(playerDataToTransfer.getHunger());
+                                        player.setHealth(playerDataToTransfer.getHealth());
                                     }
                                 }.runTask(Sectors.getPlugin(Sectors.class));
                                 break;
