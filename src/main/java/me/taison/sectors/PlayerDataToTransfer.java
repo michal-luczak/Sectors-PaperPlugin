@@ -3,6 +3,7 @@ package me.taison.sectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -27,8 +28,10 @@ public class PlayerDataToTransfer implements Serializable {
     private float yaw;
     private float health;
     private int hunger;
+    private int heldItemSlot;
 
     public PlayerDataToTransfer(Player player, int serverPort) {
+        heldItemSlot = player.getInventory().getHeldItemSlot();
         hunger = player.getFoodLevel();
         health = (float) player.getHealth();
         x = player.getLocation().getBlockX();

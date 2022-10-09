@@ -147,7 +147,7 @@ public class WorldBorderBoundsEvent implements Listener {
             e.printStackTrace();
         }
         player.sendPluginMessage(Sectors.getPlugin(Sectors.class), "changesector:main", b.toByteArray());
-        RedisPubSubSystem.publish(playerDataToTransfer, (byte) 9);
+        new RedisPubSubSystem().publish(playerDataToTransfer, (byte) 9);
     }
 
     private Optional<Bound> getBound(Location location) {

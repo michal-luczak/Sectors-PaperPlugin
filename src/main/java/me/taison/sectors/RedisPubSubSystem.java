@@ -17,10 +17,11 @@ import java.util.stream.Collectors;
 
 public class RedisPubSubSystem {
 
-    private static final Jedis jedisForPublish = new Jedis();
-    private static final Jedis jedisForSubscribe = new Jedis();
+    private final Jedis jedisForPublish = new Jedis();
+    private final Jedis jedisForSubscribe = new Jedis();
+    private boolean isRunning;
 
-    public static void subscribeChannel() {
+    public void subscribeChannel() {
 
         try {
 
@@ -42,6 +43,16 @@ public class RedisPubSubSystem {
                                 new BukkitRunnable() {
                                     @Override
                                     public void run() {
+                                        if (isRunning) {
+                                            cancel();
+                                            return;
+                                        }
+
+                                        isRunning = true;
+
+                                        if (Bukkit.getScheduler().isQueued(getTaskId()))
+                                            cancel();
+
                                         Player player = Bukkit.getPlayer(playerDataToTransfer.getUuid());
                                         player.teleport(location);
 
@@ -52,15 +63,16 @@ public class RedisPubSubSystem {
                                         }
 
                                         if (playerDataToTransfer.getArmor().get(EquipmentSlot.FEET) != null)
-                                            player.getInventory().setHelmet(new ItemStack(playerDataToTransfer.getArmor().get(EquipmentSlot.FEET)));
+                                            player.getInventory().setBoots(new ItemStack(playerDataToTransfer.getArmor().get(EquipmentSlot.FEET)));
                                         if (playerDataToTransfer.getArmor().get(EquipmentSlot.LEGS) != null)
-                                            player.getInventory().setHelmet(new ItemStack(playerDataToTransfer.getArmor().get(EquipmentSlot.LEGS)));
+                                            player.getInventory().setLeggings(new ItemStack(playerDataToTransfer.getArmor().get(EquipmentSlot.LEGS)));
                                         if (playerDataToTransfer.getArmor().get(EquipmentSlot.CHEST) != null)
-                                            player.getInventory().setHelmet(new ItemStack(playerDataToTransfer.getArmor().get(EquipmentSlot.CHEST)));
+                                            player.getInventory().setChestplate(new ItemStack(playerDataToTransfer.getArmor().get(EquipmentSlot.CHEST)));
                                         if (playerDataToTransfer.getArmor().get(EquipmentSlot.HEAD) != null)
                                             player.getInventory().setHelmet(new ItemStack(playerDataToTransfer.getArmor().get(EquipmentSlot.HEAD)));
 
                                         player.getActivePotionEffects().clear();
+
                                         player.addPotionEffects(playerDataToTransfer.getEffects().stream().map(PotionEffect::new).collect(Collectors.toSet()));
 
                                         player.getEnderChest().clear();
@@ -71,8 +83,11 @@ public class RedisPubSubSystem {
 
                                         player.setFoodLevel(playerDataToTransfer.getHunger());
                                         player.setHealth(playerDataToTransfer.getHealth());
+                                        player.getInventory().setHeldItemSlot(playerDataToTransfer.getHeldItemSlot());
+                                        isRunning = false;
                                     }
                                 }.runTask(Sectors.getPlugin(Sectors.class));
+
                                 break;
                             }
                         }
@@ -92,7 +107,7 @@ public class RedisPubSubSystem {
         }
     }
 
-    public static void publish(Serializable object, byte numberOfChannel) {
+    public void publish(Serializable object, byte numberOfChannel) {
 
         try {
             jedisForPublish.publish(new byte[]{numberOfChannel}, SerializationUtils.serialize(object));

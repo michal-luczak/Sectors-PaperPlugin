@@ -4,7 +4,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Sectors extends JavaPlugin {
 
-    private final static Thread thread = new Thread(RedisPubSubSystem::subscribeChannel);
+    private final static Thread thread = new Thread(new RedisPubSubSystem()::subscribeChannel);
 
     @Override
     public void onEnable() {
