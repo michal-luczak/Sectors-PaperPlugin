@@ -71,7 +71,9 @@ public class RedisPubSubSystem {
                                         if (playerDataToTransfer.getArmor().get(EquipmentSlot.HEAD) != null)
                                             player.getInventory().setHelmet(new ItemStack(playerDataToTransfer.getArmor().get(EquipmentSlot.HEAD)));
 
-                                        player.getActivePotionEffects().clear();
+                                        for (PotionEffect activePotionEffect : player.getActivePotionEffects()) {
+                                            player.removePotionEffect(activePotionEffect.getType());
+                                        }
 
                                         player.addPotionEffects(playerDataToTransfer.getEffects().stream().map(PotionEffect::new).collect(Collectors.toSet()));
 
