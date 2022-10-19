@@ -22,7 +22,6 @@ public class RedisPubSubSystem {
     private boolean isRunning;
 
     public void subscribeChannel() {
-
         try {
 
             BinaryJedisPubSub binaryJedisPubSub = new BinaryJedisPubSub() {
