@@ -3,6 +3,7 @@ package me.taison.sectors;
 import org.apache.commons.lang3.SerializationUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -13,6 +14,7 @@ import redis.clients.jedis.Jedis;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class RedisPubSubSystem {
@@ -53,7 +55,14 @@ public class RedisPubSubSystem {
                                             cancel();
 
                                         Player player = Bukkit.getPlayer(playerDataToTransfer.getUuid());
-                                        player.teleport(location);
+                                        if (player.getPassengers().isEmpty())
+                                            player.teleport(location);
+                                        else {
+                                            List<Entity> passengers = player.getPassengers();
+                                            player.getPassengers().forEach(player::removePassenger);
+                                            player.teleport(location);
+                                            passengers.forEach(player::addPassenger);
+                                        }
 
                                         player.getInventory().clear();
                                         for (Integer i : playerDataToTransfer.getItems().keySet()) {
