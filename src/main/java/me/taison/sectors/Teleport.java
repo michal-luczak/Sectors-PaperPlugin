@@ -55,7 +55,7 @@ public class Teleport {
                         return;
                     }
                     case E -> {
-                        if (playerZ >= -75) {
+                        if (playerZ >= Sectors.boundW) {
                             serverToConnectName = Server.SPAWN;
                         }
                         else
@@ -79,7 +79,7 @@ public class Teleport {
                         playerDataToTransfer.setX(playerDataToTransfer.getX() + 2);
                     }
                     case N -> {
-                        if (playerX >= -75)
+                        if (playerX >= Sectors.boundS)
                             serverToConnectName = Server.SPAWN;
                         else
                             serverToConnectName = Server.SECTOR_WEST;
@@ -98,7 +98,7 @@ public class Teleport {
                         return;
                     }
                     case S -> {
-                        if (playerX <= 75)
+                        if (playerX <= Sectors.boundN)
                             serverToConnectName = Server.SPAWN;
                         else
                             serverToConnectName = Server.SECTOR_EAST;
@@ -109,7 +109,7 @@ public class Teleport {
             case SECTOR_EAST -> {
                 switch (bound) {
                     case W -> {
-                        if (playerZ <= 75)
+                        if (playerZ <= Sectors.boundE)
                             serverToConnectName = Server.SPAWN;
                         else
                             serverToConnectName = Server.SECTOR_SOUTH;
